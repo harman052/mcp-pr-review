@@ -16,7 +16,7 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for the reasoning behind the key design
 
 - **Next.js** (App Router) for the frontend and API routes.
 - **Vercel AI SDK** (`ai`, `@ai-sdk/mcp`, `@ai-sdk/anthropic`) for the MCP client and structured LLM output.
-- **GitHub MCP server** (self-hosted, via Docker) as the data source.
+- **GitHub MCP server** (remote) as the data source.
 - **Zod** for the structured output schema shared between the LLM call and the frontend types.
 
 ## Getting started
