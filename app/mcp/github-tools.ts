@@ -5,7 +5,7 @@ import {
   PullRequest,
   PullRequestFile,
   Repo,
-} from "./types.js";
+} from "./types";
 
 export function parseResponse(response: CallToolResult) {
   if ("content" in response && !response.isError) {

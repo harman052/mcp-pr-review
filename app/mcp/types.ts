@@ -7,6 +7,17 @@ export interface Repo {
   perPage?: number;
 }
 
+export interface PullRequestListItem {
+  number: number;
+  title: string;
+  state: "open" | "closed";
+  draft?: boolean;
+  html_url: string;
+  user: { login: string } | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface PullRequest {
   owner: string;
   repo: string;
