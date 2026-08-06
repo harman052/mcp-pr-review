@@ -1,14 +1,16 @@
-import { createMCPClient } from "@ai-sdk/mcp";
-import { config } from "dotenv";
-import { listPullRequests, readPullRequest } from "./github-tools.js";
-import { generateText, streamText, Output } from "ai";
+import { createMCPClient, type MCPClient } from "@ai-sdk/mcp";
 import { anthropic } from "@ai-sdk/anthropic";
-import { SYSTEM_PROMPT } from "./system-prompt.js";
+import { createTextStreamResponse, Output, streamText, toTextStream } from "ai";
 import z from "zod";
+import {
+  listPullRequests,
+  parseResponse,
+  readPullRequest,
+} from "./github-tools";
+import { SYSTEM_PROMPT } from "./system-prompt";
+import type { PullRequest, PullRequestListItem, Repo } from "./types";
 
-config();
-
-const reviewSchema = z.object({
+export const reviewSchema = z.object({
   overview: z
     .string()
     .describe("One sentence on what the PR does, in plain language"),
@@ -31,35 +33,74 @@ const reviewSchema = z.object({
   openQuestions: z.array(z.string()),
 });
 
-async function main() {
-  let mcpClient;
+export type Review = z.infer<typeof reviewSchema>;
+
+/**
+ * Opens a connection to GitHub's MCP server, runs `work`, and always closes it.
+ */
+async function withMCPClient<T>(
+  work: (client: MCPClient) => Promise<T>,
+): Promise<T> {
+  const githubPat = process.env.GITHUB_PERSONAL_ACCESS_TOKEN;
+
+  if (!githubPat) {
+    throw new Error("GITHUB_PERSONAL_ACCESS_TOKEN is not set");
+  }
+
+  const mcpClient = await createMCPClient({
+    transport: {
+      type: "http",
+      url: "https://api.githubcopilot.com/mcp/",
+      headers: {
+        Authorization: `Bearer ${githubPat}`,
+      },
+    },
+  });
 
   try {
-    mcpClient = await createMCPClient({
-      transport: {
-        type: "http",
-        url: "https://api.githubcopilot.com/mcp/",
-        headers: {
-          Authorization: `Bearer ${process.env.GITHUB_PAT}`,
-        },
-      },
+    return await work(mcpClient);
+  } finally {
+    await mcpClient.close();
+  }
+}
+
+export async function getPullRequests({
+  owner,
+  repo,
+  state = "open",
+  sort = "updated",
+  direction = "desc",
+  perPage = 30,
+}: Pick<Repo, "owner" | "repo"> & Partial<Repo>) {
+  return withMCPClient(async (client) => {
+    const response = await listPullRequests(client, {
+      owner,
+      repo,
+      state,
+      sort,
+      direction,
+      perPage,
     });
 
-    // TODO: call it when user submits the repo URL
-    //await listPullRequests(mcpClient);
+    const payload = parseResponse(response);
 
-    // TODO: call it when user selects a particular PR for review
-    const contextBlock = await readPullRequest(mcpClient, {
-      owner: "github",
-      repo: "github-mcp-server",
-      pullNumber: 2991,
-    });
+    const pullRequests: Array<PullRequestListItem> = Array.isArray(payload)
+      ? payload
+      : (payload?.pull_requests ?? payload?.items ?? []);
+
+    return pullRequests;
+  });
+}
+
+export async function reviewPullRequest(pullRequestDetails: PullRequest) {
+  return withMCPClient(async (client) => {
+    const contextBlock = await readPullRequest(client, pullRequestDetails);
 
     if (!contextBlock) {
       throw new Error("Failed to build PR context");
     }
 
-    const { output } = await generateText({
+    const result = await streamText({
       model: anthropic("claude-sonnet-4-6"),
       output: Output.object({
         schema: reviewSchema,
@@ -67,12 +108,9 @@ async function main() {
       system: SYSTEM_PROMPT,
       prompt: contextBlock,
     });
-    console.log("output", output);
-  } catch (error) {
-    console.error(error);
-  } finally {
-    await mcpClient?.close();
-  }
-}
 
-main();
+    return createTextStreamResponse({
+      stream: toTextStream({ stream: result.stream }),
+    });
+  });
+}
