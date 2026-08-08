@@ -36,10 +36,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       )}
     >
       <body className="min-h-full flex flex-col">
-        <main className="min-h-screen p-8">
-          <div className="max-w-4xl mx-auto space-y-8">
+        <main className="min-h-screen">
+          <div className="max-w-4xl mx-auto">
             <Header />
-            <div>{children}</div>
+            <div className="min-h-[calc(100vh-8rem)] flex justify-center w-full mt-16">
+              {children}
+            </div>
           </div>
         </main>
       </body>
