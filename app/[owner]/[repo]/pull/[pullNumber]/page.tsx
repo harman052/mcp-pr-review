@@ -8,11 +8,12 @@ import { CIStatus } from "@/components/CIStatus";
 import { FilesToReview } from "@/components/FilesToReview";
 import { OpenQuestions } from "@/components/OpenQuestions";
 import { Heading } from "@/components/Heading";
+import Loading from "./loading";
 
 export default function PullRequestReview({
   params,
 }: PageProps<"/[owner]/[repo]/pull/[pullNumber]">) {
-  const { object, submit } = useObject({
+  const { object, submit, isLoading } = useObject({
     api: "/api/review",
     schema: reviewSchema,
   });
@@ -23,6 +24,10 @@ export default function PullRequestReview({
     submit({ owner, repo, pullNumber });
   }, [owner, repo, pullNumber]);
 
+  if (!object) {
+    return <Loading />;
+  }
+
   return (
     <div className="space-y-8">
       <Heading level={2}>Pull Request: #{pullNumber}</Heading>
@@ -31,16 +36,20 @@ export default function PullRequestReview({
 
       <Heading level={3}>Risk level and CI status</Heading>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <RiskLevel level={object?.riskLevel} reason={object?.riskReason} />
+        <RiskLevel
+          isLoading={isLoading}
+          level={object?.riskLevel}
+          reason={object?.riskReason}
+        />
 
         <CIStatus
+          isLoading={isLoading}
           passing={object?.ciStatus?.passing}
           details={object?.ciStatus?.details}
         />
       </div>
 
       <FilesToReview files={object?.filesToReview} />
-
       <OpenQuestions questions={object?.openQuestions} />
     </div>
   );
