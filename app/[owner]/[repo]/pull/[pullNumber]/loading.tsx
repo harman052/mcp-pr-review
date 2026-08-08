@@ -3,7 +3,7 @@ import { SkeletonCard } from "./SkeletonCard";
 
 export default function Loading() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 w-full">
       <Skeleton className="h-9 w-64" />
 
       <section className="space-y-3">
