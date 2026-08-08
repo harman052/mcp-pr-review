@@ -29,7 +29,7 @@ export default function PullRequestReview({
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 w-full">
       <Heading level={2}>Pull Request: #{pullNumber}</Heading>
       <Heading level={3}>Overview</Heading>
       <div className="text-sm">{object?.overview}</div>
