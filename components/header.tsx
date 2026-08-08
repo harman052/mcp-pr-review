@@ -1,21 +1,25 @@
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { ExternalLink } from "lucide-react";
 
 export function Header() {
   return (
-    <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
+    <header className="flex h-(--header-height) items-center gap-2 border-b py-2">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
         <h1 className="text-base font-medium">ReviewPilot</h1>
-        <div className="ml-auto flex items-center gap-2">
-          <Button variant="default" size="sm" className="hidden sm:flex">
-            <a
-              href="https://github.com/harman052/mcp-pr-review"
-              rel="noopener noreferrer"
-              target="_blank"
-              className="dark:text-foreground"
-            >
-              GitHub
-            </a>
-          </Button>
+        <div className="ml-auto gap-2">
+          <a
+            href="https://github.com/harman052/mcp-pr-review"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              buttonVariants({ variant: "default", size: "sm" }),
+              "hidden sm:flex",
+            )}
+          >
+            GitHub
+            <ExternalLink />
+          </a>
         </div>
       </div>
     </header>
