@@ -1,4 +1,4 @@
-import { RepoUrlForm } from "@/components/repo-url-form";
+import { RepoUrlForm } from "@/components/RepoUrlForm";
 
 export default function LandingPage() {
   return (
