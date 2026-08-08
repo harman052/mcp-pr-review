@@ -12,11 +12,17 @@ interface FileToReview {
 }
 
 interface FilesToReviewProps {
-  files?: FileToReview[];
+  files?: (FileToReview | undefined)[];
 }
 
 export function FilesToReview({ files }: FilesToReviewProps) {
   if (!files?.length) {
+    return null;
+  }
+
+  const validFiles = files?.filter((file) => file !== undefined);
+
+  if (!validFiles?.length) {
     return null;
   }
 
@@ -25,7 +31,7 @@ export function FilesToReview({ files }: FilesToReviewProps) {
       <Heading level={3}>Files needing closer attention</Heading>
 
       <div className="space-y-4">
-        {files.map((file, index) => (
+        {validFiles.map((file, index) => (
           <Item
             className="mb-4"
             key={file.path ?? index}

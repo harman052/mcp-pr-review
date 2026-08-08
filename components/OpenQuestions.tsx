@@ -2,7 +2,7 @@ import { Item, ItemContent, ItemTitle } from "@/components/ui/item";
 import { Heading } from "./Heading";
 
 interface OpenQuestionsProps {
-  questions?: string[];
+  questions?: (string | undefined)[];
 }
 
 export function OpenQuestions({ questions }: OpenQuestionsProps) {
