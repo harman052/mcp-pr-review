@@ -26,19 +26,22 @@ export function RepoUrlForm() {
         <FieldSet>
           <FieldGroup>
             <Field data-invalid={state.error ? true : undefined}>
-              <FieldLabel htmlFor="repoUrl">GitHub Repository URL</FieldLabel>
+              <FieldLabel htmlFor="repoUrl" className="justify-center">
+                Enter GitHub Repository URL
+              </FieldLabel>
               <Input
                 id="repoUrl"
                 name="repoUrl"
                 placeholder="https://github.com/vercel/next.js"
                 aria-invalid={state.error ? true : undefined}
                 required
+                className="justify-center text-center"
               />
               <FieldError>{state.error}</FieldError>
             </Field>
           </FieldGroup>
         </FieldSet>
-        <Field orientation="horizontal">
+        <Field orientation="horizontal" className="justify-center">
           <Button type="submit" disabled={pending}>
             {pending ? "Loading pull requests…" : "Submit"}
           </Button>
