@@ -1,11 +1,13 @@
+import type { LucideIcon } from "lucide-react";
 import { AlertTriangle, CircleCheck, ShieldAlert } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { StatusCard, loadingStatus } from "./StatusCard";
 
-type RiskLevel = "Low" | "Medium" | "High";
+type RiskLevelValue = "Low" | "Medium" | "High";
 
 interface RiskLevelProps {
-  level?: RiskLevel;
+  level?: RiskLevelValue;
   reason?: string;
+  isLoading: boolean;
 }
 
 const riskConfig = {
@@ -28,36 +30,33 @@ const riskConfig = {
       "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-400",
   },
 } satisfies Record<
-  RiskLevel,
+  RiskLevelValue,
   {
     label: string;
-    icon: typeof CircleCheck;
+    icon: LucideIcon;
     className: string;
+  }
+> satisfies Record<
+  RiskLevelValue,
+  Omit<typeof loadingStatus, "label"> & {
+    label: string;
   }
 >;
 
-export function RiskLevel({ level, reason }: RiskLevelProps) {
-  if (!level) {
+export function RiskLevel({ level, reason, isLoading }: RiskLevelProps) {
+  if (isLoading && level === undefined) {
+    return <StatusCard {...loadingStatus} label="Loading risk level" />;
+  }
+
+  if (level === undefined) {
     return (
-      <div className="rounded-lg border bg-muted/50 p-4">
-        <div className="text-sm text-muted-foreground">
-          Risk level unavailable
-        </div>
-      </div>
+      <StatusCard
+        label="Risk level unavailable"
+        icon={loadingStatus.icon}
+        className={loadingStatus.className}
+      />
     );
   }
 
-  const config = riskConfig[level];
-  const Icon = config.icon;
-
-  return (
-    <div className={cn("rounded-lg border p-4", config.className)}>
-      <div className="flex items-center gap-2">
-        <Icon className="size-5 shrink-0" />
-        <span className="font-semibold">{config.label}</span>
-      </div>
-
-      {reason && <p className="mt-2 text-sm opacity-90">{reason}</p>}
-    </div>
-  );
+  return <StatusCard {...riskConfig[level]} reason={reason} />;
 }
