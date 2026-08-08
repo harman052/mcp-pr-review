@@ -1,8 +1,7 @@
-import { ElementType, ReactNode } from "react";
+import { ElementType, HTMLAttributes } from "react";
 
-export interface HeadingProps {
+export interface HeadingProps extends HTMLAttributes<HTMLHeadingElement> {
   level: 1 | 2 | 3;
-  children: ReactNode;
 }
 
 const headingStyles = {
@@ -11,7 +10,16 @@ const headingStyles = {
   3: "mb-2 text-xl font-semibold",
 } as const;
 
-export function Heading({ level, children }: HeadingProps) {
+export function Heading({
+  level,
+  children,
+  className,
+  ...props
+}: HeadingProps) {
   const Tag: ElementType = `h${level}`;
-  return <Tag className={headingStyles[level]}>{children}</Tag>;
+  return (
+    <Tag className={`${headingStyles[level]} ${className ?? ""}`} {...props}>
+      {children}
+    </Tag>
+  );
 }
